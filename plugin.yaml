@@ -3,5 +3,5 @@ version: "0.1.0"
 description: "Step through Hermes Desktop sidebar sessions in on-screen order with a keyboard shortcut, wrapping at both ends."
 author: devseunggwan
 kind: standalone
-requires_hermes: ">=0.21"
+requires_hermes: ">=0.21.5"
 platforms: []

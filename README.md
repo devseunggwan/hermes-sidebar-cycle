@@ -35,7 +35,7 @@ Then reload desktop plugins (`⌘K` → **Reload desktop plugins**) or restart H
 
 ## Requirements
 
-Hermes Desktop with the plugin SDK session-row slots (Hermes `>=0.21`). Desktop-only; no Python half, tools, hooks, or environment variables.
+Hermes Desktop with the plugin SDK session-row slots (Hermes `>=0.21.5`). Desktop-only; no Python half, tools, hooks, or environment variables.
 
 ## License
 
