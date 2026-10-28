@@ -53,7 +53,8 @@ async function revealBeyond(edge, direction) {
   return idOf(markers().at(direction === 1 ? -1 : 0) ?? edge) !== before
 }
 
-// Scroll until the list edge opposite to `direction` is rendered, then return the window.
+// Scroll until the list edge opposite to `direction` is rendered. `reached` is
+// false when MAX_WRAP_PASSES ran out first, so the window may not start at the edge.
 async function scrollToEdge(direction) {
   const towardStart = direction === 1
   let list = markers()
@@ -62,13 +63,13 @@ async function scrollToEdge(direction) {
     const edge = towardStart ? list[0] : list[list.length - 1]
 
     if (!(await revealBeyond(edge, towardStart ? -1 : 1))) {
-      break
+      return { list, reached: true }
     }
 
     list = markers()
   }
 
-  return list
+  return { list, reached: list.length === 0 }
 }
 
 async function open(sessionId) {
@@ -107,7 +108,7 @@ async function step(direction) {
   }
 
   // Real edge, or the focused row is outside the rendered window: wrap.
-  list = await scrollToEdge(direction)
+  list = (await scrollToEdge(direction)).list
 
   if (list.length > 0) {
     return open(idOf(direction === 1 ? list[0] : list[list.length - 1]))
@@ -120,7 +121,9 @@ const run = direction => () => void step(direction).catch(error => host.notifyEr
 const SLOT_COUNT = 9
 
 async function jump(slot) {
-  const target = (await scrollToEdge(1))[slot - 1]
+  const { list, reached } = await scrollToEdge(1)
+  // A capped scroll leaves rows above the window, so its Nth row is not the sidebar's.
+  const target = reached ? list[slot - 1] : undefined
 
   if (target) {
     await open(idOf(target))
