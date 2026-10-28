@@ -25,7 +25,7 @@ It uses only the public plugin SDK (`@hermes/plugin-sdk`):
 - **Order** — a zero-size marker rendered into each session row through the `SESSION_ROW_AREAS.leading` slot. Walking the markers in document order gives the sidebar's real render order.
 - **Current session** — `host.state.focusedStoredSessionId`.
 - **Navigation** — `host.openSession(id)`.
-- **Long lists** — the Recents list is virtualized, so at the edge of the rendered window the plugin scrolls its own marker into view to render more rows before deciding to wrap. `⌘N` scrolls the sidebar to its top first, so it counts from the first row even when the list is scrolled.
+- **Long lists** — the Recents list is virtualized, so at the edge of the rendered window the plugin scrolls its own marker into view to render more rows before deciding to wrap.
 
 It does not query, click, or restyle the app's own markup, so sidebar styling changes do not break it.
 

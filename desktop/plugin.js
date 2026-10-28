@@ -116,7 +116,6 @@ async function step(direction) {
 
 const run = direction => () => void step(direction).catch(error => host.notifyError?.(error))
 
-// ⌘1–9: the Nth row from the top of the sidebar, like a multiplexer's "select workspace N".
 const SLOT_COUNT = 9
 
 async function jump(slot) {
