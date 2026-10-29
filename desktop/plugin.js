@@ -1,5 +1,6 @@
 // ⌃⌘] / ⌃⌘[: step through the LEFT SIDEBAR's session rows in on-screen order,
 // one row per press, wrapping last → first (and first → last).
+// ⌘1–9: open the Nth sidebar row.
 // Built-in session.next opens the recent-session switcher HUD on a repeated
 // press while ⌃ is held, and walks recency order rather than the sidebar's.
 //
@@ -115,12 +116,37 @@ async function step(direction) {
 
 const run = direction => () => void step(direction).catch(error => host.notifyError?.(error))
 
+const SLOT_COUNT = 9
+
+async function jump(slot) {
+  const target = (await scrollToEdge(1))[slot - 1]
+
+  if (target) {
+    await open(idOf(target))
+  }
+}
+
+const runSlot = slot => () => void jump(slot).catch(error => host.notifyError?.(error))
+
+const slotActions = Array.from({ length: SLOT_COUNT }, (_, i) => ({
+  id: `slot.${i + 1}`,
+  area: KEYBINDS_AREA,
+  data: {
+    id: `sidebarCycle.slot.${i + 1}`,
+    category: 'session',
+    defaults: [`mod+${i + 1}`],
+    label: `Sidebar session ${i + 1}`,
+    run: runSlot(i + 1)
+  }
+}))
+
 export default {
   id: ID,
   name: 'Sidebar session cycle',
-  description: '⌃⌘] / ⌃⌘[ steps through sidebar sessions in on-screen order and wraps around.',
+  description: '⌃⌘] / ⌃⌘[ steps through sidebar sessions in on-screen order; ⌘1–9 jumps to the Nth one.',
   register(ctx) {
     ctx.registerMany([
+      ...slotActions,
       {
         id: 'marker',
         area: SESSION_ROW_AREAS.leading,

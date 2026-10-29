@@ -1,6 +1,6 @@
 name: sidebar-cycle
-version: "0.1.0"
-description: "Step through Hermes Desktop sidebar sessions in on-screen order with a keyboard shortcut, wrapping at both ends."
+version: "0.2.0"
+description: "Move through Hermes Desktop sidebar sessions in on-screen order: step with wrap-around, or jump to the Nth one."
 author: devseunggwan
 kind: standalone
 requires_hermes: ">=0.21.5"
