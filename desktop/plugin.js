@@ -8,7 +8,11 @@
 // through the session-row slot, asks the host which session is focused, and
 // opens the next one through host.openSession. It never queries or clicks the
 // app's own markup, so a sidebar restyle cannot break it.
-import { host, KEYBINDS_AREA, SESSION_ROW_AREAS } from '@hermes/plugin-sdk'
+//
+// Keys come from its own keydown listener, not KEYBINDS_AREA: the desktop
+// keybind store persists a late-registered action as [] on any panel edit,
+// which unbinds it for good.
+import { host, SESSION_ROW_AREAS } from '@hermes/plugin-sdk'
 import { jsx } from 'react/jsx-runtime'
 
 const ID = 'sidebar-cycle'
@@ -116,8 +120,6 @@ async function step(direction) {
 
 const run = direction => () => void step(direction).catch(error => host.notifyError?.(error))
 
-const SLOT_COUNT = 9
-
 async function jump(slot) {
   const target = (await scrollToEdge(1))[slot - 1]
 
@@ -128,17 +130,46 @@ async function jump(slot) {
 
 const runSlot = slot => () => void jump(slot).catch(error => host.notifyError?.(error))
 
-const slotActions = Array.from({ length: SLOT_COUNT }, (_, i) => ({
-  id: `slot.${i + 1}`,
-  area: KEYBINDS_AREA,
-  data: {
-    id: `sidebarCycle.slot.${i + 1}`,
-    category: 'session',
-    defaults: [`mod+${i + 1}`],
-    label: `Sidebar session ${i + 1}`,
-    run: runSlot(i + 1)
+const IS_MAC = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform || navigator.userAgent || '')
+
+// Physical keys (`event.code`), so the chords hold on any keyboard layout.
+// macOS: ⌃⌘] / ⌃⌘[ and ⌘1–9. Elsewhere ⌘ does not exist: Ctrl+] / Ctrl+[ and Ctrl+1–9.
+const STEP_CODES = { BracketRight: 1, BracketLeft: -1 }
+
+function actionFor(event) {
+  if (event.altKey || event.shiftKey) {
+    return null
   }
-}))
+
+  const step = STEP_CODES[event.code]
+
+  if (step && event.ctrlKey && event.metaKey === IS_MAC) {
+    return run(step)
+  }
+
+  const slot = /^Digit([1-9])$/.exec(event.code)?.[1]
+  const slotModifier = IS_MAC ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey
+
+  return slot && slotModifier ? runSlot(Number(slot)) : null
+}
+
+// On `document`, capture phase: the app's dispatcher listens on `window`, so
+// it always sees the key first. A chord it handled arrives defaultPrevented,
+// which keeps a built-in action on the same chord winning. While the
+// shortcuts panel captures a new binding the app stops propagation, so the
+// key never reaches here.
+function onKeyDown(event) {
+  if (event.defaultPrevented || event.isComposing) {
+    return
+  }
+
+  const action = actionFor(event)
+
+  if (action) {
+    event.preventDefault()
+    action()
+  }
+}
 
 export default {
   id: ID,
@@ -146,34 +177,14 @@ export default {
   description: '⌃⌘] / ⌃⌘[ steps through sidebar sessions in on-screen order; ⌘1–9 jumps to the Nth one.',
   register(ctx) {
     ctx.registerMany([
-      ...slotActions,
       {
         id: 'marker',
         area: SESSION_ROW_AREAS.leading,
         data: { render: props => jsx(Marker, props) }
-      },
-      {
-        id: 'next',
-        area: KEYBINDS_AREA,
-        data: {
-          id: 'sidebarCycle.next',
-          category: 'session',
-          defaults: ['mod+ctrl+]'],
-          label: 'Next sidebar session (wraps)',
-          run: run(1)
-        }
-      },
-      {
-        id: 'prev',
-        area: KEYBINDS_AREA,
-        data: {
-          id: 'sidebarCycle.prev',
-          category: 'session',
-          defaults: ['mod+ctrl+['],
-          label: 'Previous sidebar session (wraps)',
-          run: run(-1)
-        }
       }
     ])
+
+    document.addEventListener('keydown', onKeyDown, true)
+    ctx.onDispose(() => document.removeEventListener('keydown', onKeyDown, true))
   }
 }
