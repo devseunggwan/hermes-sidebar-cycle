@@ -8,11 +8,13 @@ A Hermes Desktop plugin that moves through the **left sidebar's session rows in 
 | `⌃⌘[` (Ctrl+Cmd+[) | Previous sidebar session |
 | `⌘1`–`⌘9` | Sidebar session 1–9 |
 
-All are rebindable under **Settings → Keyboard Shortcuts** (`Next sidebar session (wraps)`, `Previous sidebar session (wraps)`, `Sidebar session N`).
+On Windows and Linux the same keys use Ctrl alone: `Ctrl+]`, `Ctrl+[`, `Ctrl+1`–`Ctrl+9`.
+
+The chords are fixed: they are not listed in **Settings → Keyboard Shortcuts**. The plugin reads the keys itself because Hermes Desktop's keybind store saves a plugin-registered shortcut as unbound whenever any row in that panel is edited.
 
 ### Freeing ⌘1–9
 
-When two actions share a chord, the built-in action runs first. Hermes ships `⌘1`–`⌘9` on **Switch to tab N** and **Switch to profile N**, so `Sidebar session N` only fires after you clear `⌘N` from those rows (and from **Switch to recent session N** if you moved it there). Or bind `Sidebar session N` to another chord. The plugin never changes other actions' bindings itself.
+A built-in shortcut on the same chord always runs instead of the plugin. Hermes ships `⌘1`–`⌘9` on **Switch to tab N** and **Switch to profile N**, so `Sidebar session N` only fires after you clear `⌘N` from those rows in **Settings → Keyboard Shortcuts** (and from **Switch to recent session N** if you moved it there). On Windows and Linux those rows, and **Switch to recent session N**, all sit on `Ctrl+N`, so clear `Ctrl+N` from each of them. The plugin never changes other actions' bindings itself.
 
 ## Why
 
@@ -25,6 +27,7 @@ It uses only the public plugin SDK (`@hermes/plugin-sdk`):
 - **Order** — a zero-size marker rendered into each session row through the `SESSION_ROW_AREAS.leading` slot. Walking the markers in document order gives the sidebar's real render order.
 - **Current session** — `host.state.focusedStoredSessionId`.
 - **Navigation** — `host.openSession(id)`.
+- **Keys** — a `keydown` listener on `document` in the capture phase. The app's own shortcut dispatcher runs first on `window`; a key it already handled is left alone.
 - **Long lists** — the Recents list is virtualized, so at the edge of the rendered window the plugin scrolls its own marker into view to render more rows before deciding to wrap.
 
 It does not query, click, or restyle the app's own markup, so sidebar styling changes do not break it.
