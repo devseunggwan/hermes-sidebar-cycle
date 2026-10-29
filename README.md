@@ -14,7 +14,7 @@ The chords are fixed: they are not listed in **Settings → Keyboard Shortcuts**
 
 ### Freeing ⌘1–9
 
-A built-in shortcut on the same chord always runs instead of the plugin. Hermes ships `⌘1`–`⌘9` on **Switch to tab N** and **Switch to profile N**, so `Sidebar session N` only fires after you clear `⌘N` from those rows in **Settings → Keyboard Shortcuts** (and from **Switch to recent session N** if you moved it there). The plugin never changes other actions' bindings itself.
+A built-in shortcut on the same chord always runs instead of the plugin. Hermes ships `⌘1`–`⌘9` on **Switch to tab N** and **Switch to profile N**, so `Sidebar session N` only fires after you clear `⌘N` from those rows in **Settings → Keyboard Shortcuts** (and from **Switch to recent session N** if you moved it there). On Windows and Linux those rows, and **Switch to recent session N**, all sit on `Ctrl+N`, so clear `Ctrl+N` from each of them. The plugin never changes other actions' bindings itself.
 
 ## Why
 
